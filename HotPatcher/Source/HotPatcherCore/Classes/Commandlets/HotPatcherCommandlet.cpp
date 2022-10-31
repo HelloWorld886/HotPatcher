@@ -2,6 +2,7 @@
 // #include "CreatePatch/FExportPatchSettingsEx.h"
 #include "CreatePatch/PatcherProxy.h"
 #include "CommandletHelper.h"
+#include "FlibHotPatcherEditorHelper.h"
 
 // engine header
 #include "CoreMinimal.h"
@@ -24,11 +25,11 @@ int32 UHotPatcherCommandlet::Main(const FString& Params)
 	bool bStatus = FParse::Value(*Params, *FString(PATCHER_CONFIG_PARAM_NAME).ToLower(), config_path);
 	if (!bStatus)
 	{
-		UE_LOG(LogHotPatcherCommandlet, Error, TEXT("not -config=xxxx.json params."));
-		return -1;
+		UE_LOG(LogHotPatcherCommandlet, Warning, TEXT("not -config=xxxx.json params."));
+		// return -1;
 	}
 
-	if (!FPaths::FileExists(config_path))
+	if (bStatus && !FPaths::FileExists(config_path))
 	{
 		UE_LOG(LogHotPatcherCommandlet, Error, TEXT("cofnig file %s not exists."), *config_path);
 		return -1;
@@ -44,9 +45,14 @@ int32 UHotPatcherCommandlet::Main(const FString& Params)
 			FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 			AssetRegistryModule.Get().SearchAllAssets(true);
 		}
-		
+
 		TSharedPtr<FExportPatchSettings> ExportPatchSetting = MakeShareable(new FExportPatchSettings);
-		THotPatcherTemplateHelper::TDeserializeJsonStringAsStruct(JsonContent,*ExportPatchSetting);
+		
+		FString JsonContent;
+		if (FPaths::FileExists(config_path) && FFileHelper::LoadFileToString(JsonContent, *config_path))
+		{
+			THotPatcherTemplateHelper::TDeserializeJsonStringAsStruct(JsonContent,*ExportPatchSetting);
+		}
 		
 		TMap<FString, FString> KeyValues = THotPatcherTemplateHelper::GetCommandLineParamsMap(Params);
 		THotPatcherTemplateHelper::ReplaceProperty(*ExportPatchSetting, KeyValues);
@@ -61,6 +67,13 @@ int32 UHotPatcherCommandlet::Main(const FString& Params)
 		}
 		ExportPatchSetting->AssetIncludeFilters.Append(CommandletHelper::ParserPatchFilters(Params,TEXT("AssetIncludeFilters")));
 		ExportPatchSetting->AssetIgnoreFilters.Append(CommandletHelper::ParserPatchFilters(Params,TEXT("AssetIgnoreFilters")));
+
+		// 从命令行分析PlatformPakList
+		TArray<FPlatformPakListFiles> ReadPakList = ParserPlatformPakList(Params);
+		if(ReadPakList.Num())
+		{
+			ExportPatchSetting->PlatformsPakListFiles = ReadPakList;
+		}
 		
 		FString FinalConfig;
 		THotPatcherTemplateHelper::TSerializeStructAsJsonString(*ExportPatchSetting,FinalConfig);

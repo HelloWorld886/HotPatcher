@@ -11,44 +11,6 @@
 
 DEFINE_LOG_CATEGORY(LogHotReleaseCommandlet);
 
-
-#define ADD_PLATFORM_PAK_LIST TEXT("AddPlatformPakList")
-TArray<FPlatformPakListFiles> ParserPlatformPakList(const FString& Commandline)
-{
-	TArray<FPlatformPakListFiles> result;
-	TMap<FString, FString> KeyValues = THotPatcherTemplateHelper::GetCommandLineParamsMap(Commandline);
-	if(KeyValues.Find(ADD_PLATFORM_PAK_LIST))
-	{
-		FString AddPakListInfo = *KeyValues.Find(ADD_PLATFORM_PAK_LIST);
-		TArray<FString> PlatformPakLists;
-		AddPakListInfo.ParseIntoArray(PlatformPakLists,TEXT(","));
-
-		for(auto& PlatformPakList:PlatformPakLists)
-		{
-			TArray<FString> PlatformPakListToken;
-			PlatformPakList.ParseIntoArray(PlatformPakListToken,TEXT("+"));
-			if(PlatformPakListToken.Num() >= 2)
-			{
-				FString PlatformName = PlatformPakListToken[0];
-				FPlatformPakListFiles PlatformPakListItem;
-				THotPatcherTemplateHelper::GetEnumValueByName(PlatformName,PlatformPakListItem.TargetPlatform);
-				for(int32 index=1;index<PlatformPakListToken.Num();++index)
-				{
-					FString PakListPath = PlatformPakListToken[index];
-					if(FPaths::FileExists(PakListPath))
-					{
-						FFilePath PakFilePath;
-						PakFilePath.FilePath = PakListPath;
-						PlatformPakListItem.PakResponseFiles.Add(PakFilePath);
-					}
-				}
-				result.Add(PlatformPakListItem);
-			}
-		}
-	}
-	return result;
-}
-
 int32 UHotReleaseCommandlet::Main(const FString& Params)
 {
 	Super::Main(Params);

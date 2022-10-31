@@ -15,6 +15,20 @@ struct HOTPATCHERRUNTIME_API FPatcherEntitySettingBase
     virtual ~FPatcherEntitySettingBase(){}
 };
 USTRUCT(BlueprintType)
+struct HOTPATCHERRUNTIME_API FPlatformPakListFiles
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditAnywhere)
+    ETargetPlatform TargetPlatform = ETargetPlatform::None;
+    UPROPERTY(EditAnywhere)
+    TArray<FFilePath> PakResponseFiles;
+    UPROPERTY(EditAnywhere)
+    TArray<FFilePath> PakFiles;
+    UPROPERTY(EditAnywhere)
+    FString AESKey;
+};
+USTRUCT(BlueprintType)
 struct HOTPATCHERRUNTIME_API FHotPatcherSettingBase:public FPatcherEntitySettingBase
 {
     GENERATED_USTRUCT_BODY()

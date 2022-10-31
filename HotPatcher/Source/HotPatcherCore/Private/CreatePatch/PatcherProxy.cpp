@@ -88,6 +88,8 @@ FString GetShaderLibDeterministicCmdByPlatforms(const TArray<FString>& PlatformN
 
 namespace PatchWorker
 {
+	//setup 0
+	bool ImportPakListWorker(FHotPatcherPatchContext& Context);
 	// setup 1
 	bool BaseVersionReader(FHotPatcherPatchContext& Context);
 	// setup 2
@@ -178,6 +180,7 @@ void UPatcherProxy::Init(FPatcherEntitySettingBase* InSetting)
 	UFlibAssetManageHelper::UpdateAssetMangerDatabase(true);
 	GetSettingObject()->Init();
 
+	ADD_PATCH_WORKER(PatchWorker::ImportPakListWorker);
 	ADD_PATCH_WORKER(PatchWorker::BaseVersionReader);
 	ADD_PATCH_WORKER(PatchWorker::MakeCurrentVersionWorker);
 	ADD_PATCH_WORKER(PatchWorker::ParseVersionDiffWorker);
@@ -246,6 +249,21 @@ bool UPatcherProxy::DoExport()
 
 namespace PatchWorker
 {
+	// setup 0
+	bool ImportPakListWorker(FHotPatcherPatchContext& Context)
+	{
+		FText DiaLogMsg = NSLOCTEXT("ImportPakListWorker", "ImportPakListWorker", "Import Pak List.");
+		Context.UnrealPakSlowTask->EnterProgressFrame(1.0, DiaLogMsg);
+		TimeRecorder TotalTimeTR(TEXT("Import Paklist"));
+		if(Context.GetSettingObject()->ByPakList)
+		{
+			if(Context.GetSettingObject()->PlatformsPakListFiles.Num())
+			{
+				Context.GetSettingObject()->ImportPakLists();
+			}
+		}
+		return true;
+	}
 	// setup 1
 	bool BaseVersionReader(FHotPatcherPatchContext& Context)
 	{

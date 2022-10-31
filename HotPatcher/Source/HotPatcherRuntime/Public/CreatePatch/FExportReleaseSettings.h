@@ -25,21 +25,6 @@
 #include "FExportReleaseSettings.generated.h"
 
 
-USTRUCT(BlueprintType)
-struct HOTPATCHERRUNTIME_API FPlatformPakListFiles
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere)
-	ETargetPlatform TargetPlatform = ETargetPlatform::None;
-	UPROPERTY(EditAnywhere)
-	TArray<FFilePath> PakResponseFiles;
-	UPROPERTY(EditAnywhere)
-	TArray<FFilePath> PakFiles;
-	UPROPERTY(EditAnywhere)
-	FString AESKey;
-};
-
 /** Singleton wrapper to allow for using the setting structur e in SSettingsView */
 USTRUCT(BlueprintType)
 struct HOTPATCHERRUNTIME_API FExportReleaseSettings:public FHotPatcherSettingBase

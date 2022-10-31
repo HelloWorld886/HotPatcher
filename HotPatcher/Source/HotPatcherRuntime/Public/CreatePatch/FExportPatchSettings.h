@@ -114,6 +114,9 @@ public:
 	FORCEINLINE TArray<FString> GetUnrealPakCommandletOptions()const { return GetUnrealPakSettings().UnrealCommandletOptions; }
 	FORCEINLINE TArray<ETargetPlatform> GetPakTargetPlatforms()const { return PakTargetPlatforms; }
 	TArray<FString> GetPakTargetPlatformNames()const;
+
+	FORCEINLINE bool IsByPakList()const { return ByPakList; }
+	FORCEINLINE TArray<FPlatformPakListFiles> GetPlatformsPakListFiles()const {return PlatformsPakListFiles;}
 	
 	FORCEINLINE bool IsSaveDiffAnalysis()const { return IsByBaseVersion() && bStorageDiffAnalysisResults; }
 	FORCEINLINE TArray<FString> GetIgnoreDeletionModulesAsset()const{return IgnoreDeletionModulesAsset;}
@@ -172,6 +175,8 @@ public:
 	FORCEINLINE bool IsSharedShaderLibrary()const { return GetCookShaderOptions().bSharedShaderLibrary; }
 	FORCEINLINE FCookShaderOptions GetCookShaderOptions()const {return CookShaderOptions;}
 	FORCEINLINE FAssetRegistryOptions GetSerializeAssetRegistryOptions()const{return SerializeAssetRegistryOptions;}
+
+	virtual void ImportPakLists();
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BaseVersion")
 		bool bByBaseVersion = false;
@@ -179,6 +184,14 @@ public:
 		FFilePath BaseVersion;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "PatchBaseSettings")
 		FString VersionId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Version")
+		bool ByPakList = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Version", meta = (RelativeToGameContentDir, EditCondition = "ByPakList"))
+		TArray<FPlatformPakListFiles> PlatformsPakListFiles;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Version", meta = (RelativeToGameContentDir, EditCondition = "ByPakList"))
+		int32 AutoChunkNum = 0;
 
 	// require HDiffPatchUE plugin
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BinariesPatch")
